@@ -4,6 +4,10 @@ from fastapi.responses import JSONResponse
 # Create an instance of FastAPI
 app = FastAPI(title="My API Example")
 
+@app.get("/items")
+async def read_items():
+    return {"message": "Hello World"}
+
 # Define the /health endpoint
 @app.get("/health", response_class=JSONResponse)
 async def health_check():

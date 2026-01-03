@@ -24,7 +24,8 @@ WORKDIR /app
 COPY --from=builder /build/deps /app/deps
 COPY --from=builder /build/app /app/app
 
-ENV PYTHONPATH=/app/deps
+# 🔑 THIS IS THE FIX
+ENV PYTHONPATH=/app:/app/deps
 
 EXPOSE 8000
 

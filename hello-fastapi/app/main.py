@@ -4,6 +4,11 @@ from fastapi.responses import JSONResponse
 # Create an instance of FastAPI
 app = FastAPI(title="My API Example")
 
+# Root endpoint (fixes 404 on /)
+@app.get("/")
+async def root():
+    return {"message": "Welcome to My API"}
+
 @app.get("/items")
 async def read_items():
     return {"message": "Hello World"}
@@ -20,3 +25,4 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+    )

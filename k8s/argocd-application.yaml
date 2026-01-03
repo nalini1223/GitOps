@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/nalini1223/hello-fastapi.git
+    repoURL: https://github.com/nalini1223/GitOps/k8s.git
     targetRevision: main
     path: k8s
 

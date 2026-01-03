@@ -3,9 +3,9 @@ kind: Ingress
 metadata:
   name: hello-fastapi
 spec:
+  ingressClassName: nginx
   rules:
     - host: hello-fastapi.local
-    - ingressClassName: nginx
       http:
         paths:
           - path: /

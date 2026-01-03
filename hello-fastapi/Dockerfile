@@ -10,8 +10,9 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install dependencies
-COPY pyproject.toml poetry.lock ./
-RUN pip install --upgrade pip && pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
+RUN pip install --no-cache-dir \
+    --prefix=/install \
+    -r requirements.txt
 
 # Copy application code
 COPY . .

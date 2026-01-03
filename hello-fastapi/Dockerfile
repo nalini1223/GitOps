@@ -1,29 +1,31 @@
 # -------------------------
-# Builder Stage (Slim)
+# Builder stage
 # -------------------------
 FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-# Install deps into a clean prefix
 COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Copy application code
+# Install deps into a known runtime path
+RUN pip install --no-cache-dir --target=/app/deps -r requirements.txt
+
 COPY app ./app
 
 # -------------------------
-# Runtime Stage (Distroless)
+# Runtime stage (distroless)
 # -------------------------
 FROM gcr.io/distroless/python3-debian12
 
 WORKDIR /app
 
-# Copy only what is required to run
-COPY --from=builder /install /usr/local
-COPY --from=builder /app /app
+# Copy dependencies and app code
+COPY --from=builder /app/deps /app/deps
+COPY --from=builder /app/app /app/app
 
-# Distroless runs as non-root by default
+# Tell Python where to find deps
+ENV PYTHONPATH=/app/deps
+
 EXPOSE 8000
 
 CMD ["-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,7 +1,7 @@
 # -------------------------------
 # Builder stage
 # -------------------------------
-FROM python:3.14-slim AS build
+FROM python:3.11-slim AS build
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -10,7 +10,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip3 install --no-cache-dir \
+RUN pip3.11 install --no-cache-dir \
     --prefix=/install \
     -r requirements.txt
 
@@ -20,7 +20,7 @@ RUN pip3 install --no-cache-dir \
 FROM gcr.io/distroless/python3-debian11
 
 # Make Python find copied site-packages
-ENV PYTHONPATH=/usr/local/lib/python3.14/site-packages
+ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
 
 WORKDIR /app
 

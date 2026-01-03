@@ -19,9 +19,3 @@ async def health_check():
     # Return a simple JSON response indicating health status
     return {"status": "ok"}
 
-# Example of running the app using uvicorn
-# To run the app, save this file as main.py and then run:
-# uvicorn main:app --reload
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)

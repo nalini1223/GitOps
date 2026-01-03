@@ -26,7 +26,6 @@ WORKDIR /app
 
 # Copy ONLY what is needed at runtime
 COPY --from=build /install /usr/local
-COPY main.py /app/main.py
 
 EXPOSE 8000
 

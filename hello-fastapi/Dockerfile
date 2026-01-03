@@ -27,6 +27,9 @@ WORKDIR /app
 # Copy ONLY what is needed at runtime
 COPY --from=build /install /usr/local
 
+# 🔑 COPY THE APP CODE
+COPY main.py /app/main.py
+
 EXPOSE 8000
 
 # Distroless already sets python as ENTRYPOINT

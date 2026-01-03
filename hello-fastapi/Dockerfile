@@ -1,39 +1,35 @@
-# syntax=docker/dockerfile:1
-
-# Stage 1: Build stage
+# -------------------------------
+# Builder stage
+# -------------------------------
 FROM python:3.11-slim AS build
 
-# Set working directory
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Copy requirement files first for caching
 COPY requirements.txt .
 
-# Install dependencies
 RUN pip install --no-cache-dir \
     --prefix=/install \
     -r requirements.txt
 
-# Copy application code
-COPY . .
-
-# Stage 2: Runtime stage using distroless
+# -------------------------------
+# Runtime stage (distroless)
+# -------------------------------
 FROM gcr.io/distroless/python3-debian11
 
-# Set working directory
+# Make Python find copied site-packages
+ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
+
 WORKDIR /app
 
-# Copy installed Python packages
-COPY --from=build /root/.local /root/.local
+# Copy ONLY what is needed at runtime
+COPY --from=build /install /usr/local
+COPY main.py /app/main.py
 
-# Copy application code
-COPY --from=build /app /app
-
-# Adjust PATH so Python packages installed with --user are found
-ENV PATH=/root/.local/bin:$PATH
-
-# Expose FastAPI default port
 EXPOSE 8000
 
-# Command to run the FastAPI app
+# Distroless already sets python as ENTRYPOINT
 CMD ["-m", "uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
+

@@ -20,7 +20,7 @@ RUN pip3 install --no-cache-dir \
 FROM gcr.io/distroless/python3-debian11
 
 # Make Python find copied site-packages
-ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
+ENV PYTHONPATH=/usr/local/lib/python3.14/site-packages
 
 WORKDIR /app
 

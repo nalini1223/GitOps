@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/nalini1223/GitOps/k8s.git
+    repoURL: https://github.com/nalini1223/GitOps.git
     targetRevision: main
     path: k8s
 

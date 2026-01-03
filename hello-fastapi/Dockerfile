@@ -9,6 +9,8 @@ RUN pip3.11 install --no-cache-dir \
     --only-binary=:all: \
     --target=/python \
     -r requirements.txt
+    
+RUN find /python -name "*.dist-info" -type d -exec rm -rf {} +
 
 # ---------- runtime ----------
 FROM gcr.io/distroless/python3-debian12

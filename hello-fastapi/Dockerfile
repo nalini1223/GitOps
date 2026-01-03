@@ -1,37 +1,23 @@
-# -------------------------------
-# Builder stage
-# -------------------------------
+# ---------- builder ----------
 FROM python:3.11-slim AS build
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app
-
+WORKDIR /build
 COPY requirements.txt .
 
+# Force binary wheels only
 RUN pip3.11 install --no-cache-dir \
-    --prefix=/install \
+    --only-binary=:all: \
+    --target=/python \
     -r requirements.txt
 
-# -------------------------------
-# Runtime stage (distroless)
-# -------------------------------
-FROM gcr.io/distroless/python3-debian11
+# ---------- runtime ----------
+FROM gcr.io/distroless/python3-debian12
 
-# Make Python find copied site-packages
-ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
-
+ENV PYTHONPATH=/python
 WORKDIR /app
 
-# Copy ONLY what is needed at runtime
-COPY --from=build /install /usr/local
-
-# 🔑 COPY THE APP CODE
+COPY --from=build /python /python
 COPY main.py /app/main.py
 
 EXPOSE 8000
-
-# Distroless already sets python as ENTRYPOINT
 CMD ["-m", "uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
-

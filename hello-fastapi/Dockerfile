@@ -9,9 +9,9 @@ WORKDIR /app
 # Copy requirement files first for caching
 COPY requirements.txt .
 
-# Install build dependencies
-RUN pip install --upgrade pip \
-    && pip install --user -r requirements.txt
+# Install dependencies
+COPY pyproject.toml poetry.lock ./
+RUN pip install --upgrade pip && pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
 
 # Copy application code
 COPY . .

@@ -16,7 +16,9 @@ RUN find /python -name "*.dist-info" -type d -exec rm -rf {} +
 FROM gcr.io/distroless/python3-debian12
 
 ENV PYTHONPATH=/python
-COPY --from=build /python /python
+
+# 🔑 THIS WAS MISSING
+WORKDIR /app
 
 COPY --from=build /python /python
 COPY main.py /app/main.py

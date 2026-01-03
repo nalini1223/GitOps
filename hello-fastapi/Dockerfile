@@ -14,7 +14,7 @@ RUN pip3.11 install --no-cache-dir \
 FROM gcr.io/distroless/python3-debian12
 
 ENV PYTHONPATH=/python
-WORKDIR /app
+COPY --from=build /python /python
 
 COPY --from=build /python /python
 COPY main.py /app/main.py

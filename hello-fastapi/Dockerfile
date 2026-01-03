@@ -1,37 +1,38 @@
-# -------------------------------
-# Builder stage
-# -------------------------------
-FROM python:3.11-slim AS builder
+# syntax=docker/dockerfile:1
 
-# Prevent Python from writing .pyc files
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Stage 1: Build stage
+FROM python:3.11-slim AS build
 
+# Set working directory
 WORKDIR /app
 
-# Install only what is required to build Python deps
+# Copy requirement files first for caching
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir \
-    --prefix=/install \
-    -r requirements.txt
-
-# -------------------------------
-# Runtime stage (distroless)
-# -------------------------------
-FROM gcr.io/distroless/python3-debian12
-
-WORKDIR /app
-
-# Copy only installed Python packages
-COPY --from=builder /install /usr/local
+# Install build dependencies
+RUN pip install --upgrade pip \
+    && pip install --user -r requirements.txt
 
 # Copy application code
-COPY main.py /app/main.py
+COPY . .
 
-# Expose FastAPI port
+# Stage 2: Runtime stage using distroless
+FROM gcr.io/distroless/python3-debian11
+
+# Set working directory
+WORKDIR /app
+
+# Copy installed Python packages
+COPY --from=build /root/.local /root/.local
+
+# Copy application code
+COPY --from=build /app /app
+
+# Adjust PATH so Python packages installed with --user are found
+ENV PATH=/root/.local/bin:$PATH
+
+# Expose FastAPI default port
 EXPOSE 8000
 
-# Distroless requires exec-form CMD
-CMD ["-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
+# Command to run the FastAPI app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

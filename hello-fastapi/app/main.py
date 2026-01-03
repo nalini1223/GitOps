@@ -1,5 +1,3 @@
-# Python
-# Import FastAPI
 from fastapi import FastAPI
 
 # Create FastAPI instance

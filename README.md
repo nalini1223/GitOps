@@ -63,24 +63,57 @@ The system is optimized for:
 ---
 
 ## High-Level Architecture
+``
+┌──────────────────────────────────────────────────────────┐
+│                        Git Repository                    │
+│  (Application Code + Kubernetes Manifests + Policies)    │
+└───────────────▲───────────────────────────▲──────────────┘
+                │                           │
+                │ Desired State (GitOps)    │ Versioned Change
+                │                           │
+┌───────────────┴───────────────────────────┴──────────────┐
+│                   GitOps Control Plane                    │
+│                        Argo CD                            │
+│  - Pulls desired state from Git                           │
+│  - Continuously reconciles cluster state                  │
+│  - Detects and corrects drift                              │
+└───────────────▲───────────────────────────▲──────────────┘
+                │                           │
+                │ Declarative Reconciliation│ Status & Health
+                │                           │
+┌───────────────┴───────────────────────────┴──────────────┐
+│                 Kubernetes Execution Layer                │
+│  - Deployments, Services, Ingress                         │
+│  - Self-healing workloads                                 │
+│  - Health and readiness enforcement                       │
+└───────────────▲───────────────────────────▲──────────────┘
+                │
+                │ Runtime Execution
+                │
+┌───────────────┴──────────────────────────────────────────┐
+│                Application Runtime (Container)            │
+│  - Optimized, minimal container image                     │
+│  - Explicit health endpoint                               │
+│  - Stateless, horizontally scalable                       │
+└──────────────────────────────────────────────────────────┘
+``
 
 ### Core Components
 
 - **Application Layer**  
-  A minimal Python service is used to represent a typical microservice.  
-  The simplicity is intentional—this Golden Path applies equally to complex services.
+  Minimal Python service representing a production microservice.
 
 - **Container Platform**  
-  Applications are packaged as optimized, minimal container images following secure build practices.
+  Secure, optimized container images built using best practices.
 
 - **Kubernetes**  
-  Kubernetes acts as the execution environment and contract between platform and application teams.
+  Execution environment and reliability contract between platform and applications.
 
 - **GitOps Controller (Argo CD)**  
-  Continuously reconciles desired state from Git into the cluster, eliminating configuration drift.
+  Continuously enforces desired state from Git, preventing configuration drift.
 
 - **Infrastructure as Code (Terraform)**  
-  Platform components are provisioned declaratively and reproducibly.
+  Declaratively provisions platform components in a reproducible manner.
 
 ---
 

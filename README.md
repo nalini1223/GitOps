@@ -74,29 +74,29 @@ The system is optimized for:
                 │ Desired State (GitOps)    │ Versioned Change
                 │                           │
 ┌───────────────┴───────────────────────────┴──────────────┐
-│                   GitOps Control Plane                    │
-│                        Argo CD                            │
-│  - Pulls desired state from Git                           │
-│  - Continuously reconciles cluster state                  │
-│  - Detects and corrects drift                              │
+│                   GitOps Control Plane                   │
+│                        Argo CD                           │
+│  - Pulls desired state from Git                          │
+│  - Continuously reconciles cluster state                 │
+│  - Detects and corrects drift                            │
 └───────────────▲───────────────────────────▲──────────────┘
                 │                           │
                 │ Declarative Reconciliation│ Status & Health
                 │                           │
 ┌───────────────┴───────────────────────────┴──────────────┐
-│                 Kubernetes Execution Layer                │
-│  - Deployments, Services, Ingress                         │
-│  - Self-healing workloads                                 │
-│  - Health and readiness enforcement                       │
+│                 Kubernetes Execution Layer               │
+│  - Deployments, Services, Ingress                        │
+│  - Self-healing workloads                                │
+│  - Health and readiness enforcement                      │
 └───────────────▲───────────────────────────▲──────────────┘
                 │
                 │ Runtime Execution
                 │
 ┌───────────────┴──────────────────────────────────────────┐
-│                Application Runtime (Container)            │
-│  - Optimized, minimal container image                     │
-│  - Explicit health endpoint                               │
-│  - Stateless, horizontally scalable                       │
+│                Application Runtime (Container)           │
+│  - Optimized, minimal container image                    │
+│  - Explicit health endpoint                              │
+│  - Stateless, horizontally scalable                      │
 └──────────────────────────────────────────────────────────┘
 
 ```

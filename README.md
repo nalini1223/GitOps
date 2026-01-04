@@ -98,7 +98,6 @@ This implementation demonstrates a complete, production-aligned Golden Path for 
 
 <img width="1680" height="1050" alt="Screenshot 2026-01-03 at 2 10 48 PM" src="https://github.com/user-attachments/assets/941c02bf-5fec-4d74-9eb3-a1a9618c537d" />
 
-
 ---
 
 ### 2. Secure, Optimized Container Build
@@ -139,6 +138,10 @@ This implementation demonstrates a complete, production-aligned Golden Path for 
 
 **Impact:** Confirms full GitOps lifecycle is operational.
 
+
+<img width="1680" height="1050" alt="Screenshot 2026-01-03 at 3 31 43 PM" src="https://github.com/user-attachments/assets/1c152e1f-eb96-46ef-bd6f-5da4d8ffc1ce" />
+
+--------------
 
 ## Delivery Lifecycle (Conceptual)
 

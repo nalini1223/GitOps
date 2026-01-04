@@ -99,10 +99,6 @@ The system is optimized for:
 │  - Stateless, horizontally scalable                       │
 └──────────────────────────────────────────────────────────┘
 
-
-
-
-
 ```
 
 ### Core Components

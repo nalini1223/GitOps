@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: hello-fastapi
-          image: naliniudayt/fastapi-distroless:1.0
+          image: naliniudayt/fastapi-distroless:1.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

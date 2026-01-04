@@ -88,7 +88,7 @@ The system is optimized for:
 │  - Deployments, Services, Ingress                        │
 │  - Self-healing workloads                                │
 │  - Health and readiness enforcement                      │
-└───────────────▲───────────────────────────▲──────────────┘
+└───────────────▲───────────────────────────-──────────────┘
                 │
                 │ Runtime Execution
                 │

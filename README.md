@@ -63,7 +63,9 @@ The system is optimized for:
 ---
 
 ## High-Level Architecture
-``
+
+
+```
 ┌──────────────────────────────────────────────────────────┐
 │                        Git Repository                    │
 │  (Application Code + Kubernetes Manifests + Policies)    │
@@ -96,7 +98,12 @@ The system is optimized for:
 │  - Explicit health endpoint                               │
 │  - Stateless, horizontally scalable                       │
 └──────────────────────────────────────────────────────────┘
-``
+
+
+
+
+
+```
 
 ### Core Components
 

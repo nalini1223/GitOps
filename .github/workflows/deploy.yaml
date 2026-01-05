@@ -32,7 +32,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./hello-fastapi
-          file: ./hello-fastapi/Dockerfile
+          file: hello-fastapi/Dockerfile
           push: true
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}

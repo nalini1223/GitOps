@@ -62,7 +62,7 @@ The system is optimized for:
 
 ---
 
-## High-Level Architecture
+# High-Level Architecture
 -------------
 
 <img width="1327" height="1002" alt="GitOps WorkFlow" src="https://github.com/user-attachments/assets/56d2daf1-ffff-4ede-a563-6fd6a595557d" />

@@ -65,7 +65,7 @@ The system is optimized for:
 # High-Level Architecture
 -------------
 
-<img width="1327" height="1002" alt="GitOps WorkFlow" src="https://github.com/user-attachments/assets/56d2daf1-ffff-4ede-a563-6fd6a595557d" />
+<img width="1327" height="1012" alt="GitOps WorkFlow" src="https://github.com/user-attachments/assets/08affb7c-b6f1-466e-b2ae-60151a9d1ea5" />
 
 -------------
 ### Core Components

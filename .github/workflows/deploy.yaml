@@ -1,4 +1,5 @@
-name: CI - Docker Build & GitOps Update
+---
+name: CI - Docker Build and GitOps Deploy
 
 on:
   push:
@@ -7,44 +8,48 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: naliniudayt/fastapi-distroless
+  IMAGE_NAME: fastapi-distroless
 
 jobs:
-  build-push-gitops:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set image tag
-        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        run: |
+          echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Docker Hub login
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./hello-fastapi
+          file: ./hello-fastapi/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Update Kubernetes manifest
         run: |
-          sed -i "s|image:.*|image: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
+          sed -i \
+            "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
+            k8s/deployment.yaml
 
       - name: Commit GitOps update
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add k8s/deployment.yaml
-          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}"
+          git commit -m "gitops: deploy image ${IMAGE_TAG}" || echo "No changes to commit"
           git push
 
 

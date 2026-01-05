@@ -1,4 +1,4 @@
-name: CI - Build & Push Docker Image (GitOps)
+name: CI - Docker Build & GitOps Update
 
 on:
   push:
@@ -6,52 +6,45 @@ on:
       - main
 
 env:
-  IMAGE_NAME: naliniudayt/fastapi-distroless
   REGISTRY: docker.io
+  IMAGE_NAME: naliniudayt/fastapi-distroless
 
 jobs:
-  build-and-push:
+  build-push-gitops:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout source code
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Set image tag (short SHA)
       - name: Set image tag
-        id: vars
-        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # 3. Login to Docker Hub
-      - name: Login to Docker Hub
+      - name: Docker Hub login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 4. Build and push Docker image
-      - name: Build and push Docker image
+      - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+            ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
 
-      # 5. Update Kubernetes manifest with new image tag
-      - name: Update image tag in manifests
+      - name: Update Kubernetes manifest
         run: |
-          sed -i "s|image:.*|image: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}|g" manifests/deployment.yaml
+          sed -i "s|image:.*|image: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
 
-      # 6. Commit and push manifest change (GitOps trigger)
-      - name: Commit manifest changes
+      - name: Commit GitOps update
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add manifests/deployment.yaml
-          git commit -m "chore: deploy image ${{ env.TAG }}"
+          git add k8s/deployment.yaml
+          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}"
           git push
+
 

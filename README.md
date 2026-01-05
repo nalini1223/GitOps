@@ -242,9 +242,9 @@ Standardized promotion pipelines with immutable artifacts, environment-specific 
 Native support for canaries, blue-green deployments, and feature flags with automated rollback driven by real-time health signals.
 - Built-in SLO enforcement:
 First-class SLIs/SLOs integrated into CI/CD and runtime, enabling deploy-time and run-time decisions based on error budgets—not just pass/fail checks.
-Cost visibility & optimization hooks:
+- Cost visibility & optimization hooks:
 Workload-level cost attribution, anomaly detection, and automated scaling or throttling actions tied to usage and business impact.
-Automated governance & guardrails:
+- Automated governance & guardrails:
 Policy-as-code for security, compliance, and operational standards—enforced early in the pipeline and continuously at runtime.
 
 -------------------------

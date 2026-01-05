@@ -66,38 +66,7 @@ The system is optimized for:
 
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                        Git Repository                    │
-│  (Application Code + Kubernetes Manifests + Policies)    │
-└───────────────▲───────────────────────────▲──────────────┘
-                │                           │
-                │ Desired State (GitOps)    │ Versioned Change
-                │                           │
-┌───────────────┴───────────────────────────┴──────────────┐
-│                   GitOps Control Plane                   │
-│                        Argo CD                           │
-│  - Pulls desired state from Git                          │
-│  - Continuously reconciles cluster state                 │
-│  - Detects and corrects drift                            │
-└───────────────▲───────────────────────────▲──────────────┘
-                │                           │
-                │ Declarative Reconciliation│ Status & Health
-                │                           │
-┌───────────────┴───────────────────────────┴──────────────┐
-│                 Kubernetes Execution Layer               │
-│  - Deployments, Services, Ingress                        │
-│  - Self-healing workloads                                │
-│  - Health and readiness enforcement                      │
-└───────────────▲───────────────────────────-──────────────┘
-                │
-                │ Runtime Execution
-                │
-┌───────────────┴──────────────────────────────────────────┐
-│                Application Runtime (Container)           │
-│  - Optimized, minimal container image                    │
-│  - Explicit health endpoint                              │
-│  - Stateless, horizontally scalable                      │
-└──────────────────────────────────────────────────────────┘
+<img width="1327" height="1002" alt="GitOps Workflow" src="https://github.com/user-attachments/assets/f648fd2d-5a61-4074-a89c-88067f06338c" />
 
 ```
 

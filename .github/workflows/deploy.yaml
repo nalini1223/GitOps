@@ -5,9 +5,8 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'k8s/**' # This stops the Action from triggering itself
+      - 'k8s/**'
 
-# 1. FIX: Added permissions to allow the bot to push changes back to the repo
 permissions:
   contents: write
 
@@ -20,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 2. FIX: Added fetch-depth: 0 so git pull/rebase works correctly
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -43,8 +41,8 @@ jobs:
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            cache-from: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
-            cache-to: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
       - name: Update Kubernetes manifest
         run: |
@@ -59,17 +57,14 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           
-          # 1. Stage the specific file
           git add k8s/deployment.yaml
           
-          # 2. Commit (only if there are changes)
-          git commit -m "gitops: deploy image ${IMAGE_TAG}" || exit 0
+          # Use env.IMAGE_TAG to ensure the shell picks up the value from GITHUB_ENV
+          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || exit 0
           
-          # 3. Use the token to fetch and rebase right before pushing
-          # This inserts your commit at the very end of the current remote timeline
+          # Fetch and rebase right before pushing
           git pull --rebase https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git main
           
-          # 4. Push the result
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git HEAD:main
 
     

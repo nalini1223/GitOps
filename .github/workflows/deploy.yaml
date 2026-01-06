@@ -27,22 +27,32 @@ jobs:
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+        with:
+          driver: docker-container
+          install: true
+          use: true
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # SIMPLE BUILD WITHOUT CACHE (100% reliable)
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: hello-fastapi
           file: hello-fastapi/Dockerfile
           push: true
+          platforms: linux/amd64
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
       - name: Update Kubernetes manifest
         run: |
@@ -70,15 +80,7 @@ jobs:
             (echo "Conflict detected, retrying in 5s..." && sleep 5)
           done
 
-      - name: Delete old images
-        uses: snok/container-retention-policy@v2
-        with:
-          account: ${{ secrets.DOCKERHUB_USERNAME }}
-          token: ${{ secrets.DOCKERHUB_TOKEN }}
-          image-names: ${{ env.IMAGE_NAME }}
-          cut-off: 7d
-          keep-at-least: 3
-          filter-tags: "!latest"
+      # Cleanup step removed for now - can add back later if needed
 
     
 

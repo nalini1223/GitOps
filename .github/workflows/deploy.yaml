@@ -49,23 +49,28 @@ jobs:
           sed -i \
             "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
             k8s/deployment.yaml
-
       - name: Commit GitOps update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # 1. Setup Identity
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+
+          # 2. FORCE the runner to be on the real main branch
+          git checkout -B main
           
+          # 3. Pull the latest changes from remote
+          git pull https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git main
+
+          # 4. Re-apply the manifest change (just in case the pull overwrote it)
+          sed -i "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" k8s/deployment.yaml
+
+          # 5. Commit and Push
           git add k8s/deployment.yaml
+          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || echo "No changes to commit"
           
-          # Use env.IMAGE_TAG to ensure the shell picks up the value from GITHUB_ENV
-          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || exit 0
-          
-          # Fetch and rebase right before pushing
-          git pull --rebase https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git main
-          
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git HEAD:main
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git main
 
     
 

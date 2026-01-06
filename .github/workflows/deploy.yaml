@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'k8s/**' # Prevents the action from triggering itself
+      - 'k8s/**'
 
 permissions:
   contents: write
@@ -27,33 +27,22 @@ jobs:
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # FIXED: More explicit Buildx setup
-      - name: Set up Docker Buildx
-        run: |
-          echo "Setting up buildx with docker-container driver..."
-          docker buildx ls
-          docker buildx rm mybuilder || true
-          docker buildx create --name mybuilder --driver docker-container --use --bootstrap
-          docker buildx inspect mybuilder
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # SIMPLE BUILD WITHOUT CACHE (100% reliable)
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: hello-fastapi
           file: hello-fastapi/Dockerfile
           push: true
-          builder: mybuilder  # Use our custom builder
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-          cache-from: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
       - name: Update Kubernetes manifest
         run: |
@@ -70,10 +59,8 @@ jobs:
           
           git add k8s/deployment.yaml
           
-          # Only commit if changes exist
           git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || exit 0
           
-          # FIX 2: Set remote URL and use a loop to beat the "rejected" error
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
 
           for i in {1..5}; do
@@ -83,16 +70,15 @@ jobs:
             (echo "Conflict detected, retrying in 5s..." && sleep 5)
           done
 
-      # FIX 3: Cleanup old Docker Hub tags (Free tier alternative to Retention Policies)
       - name: Delete old images
         uses: snok/container-retention-policy@v2
         with:
           account: ${{ secrets.DOCKERHUB_USERNAME }}
           token: ${{ secrets.DOCKERHUB_TOKEN }}
           image-names: ${{ env.IMAGE_NAME }}
-          cut-off: 7d         # Keep images from last 7 days
-          keep-at-least: 3    # Always keep the last 3 versions
-          filter-tags: "!latest" # Never delete 'latest'
+          cut-off: 7d
+          keep-at-least: 3
+          filter-tags: "!latest"
 
     
 

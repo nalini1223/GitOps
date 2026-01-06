@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: hello-fastapi
-          image: docker.io/naliniudayt/fastapi-distroless:606390e
+          image: docker.io/naliniudayt/fastapi-distroless:0c34ef6
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

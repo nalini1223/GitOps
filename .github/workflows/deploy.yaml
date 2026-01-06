@@ -43,6 +43,7 @@ jobs:
           sed -i \
             "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
             k8s/deployment.yaml
+            
             - name: Commit GitOps update
             env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -5,7 +5,7 @@
 APP_NAME      := golden-path-app
 IMAGE_TAG     := latest
 K8S_NAMESPACE := argocd
-TERRAFORM_DIR := terraform/argocd
+TERRAFORM_DIR := terraform
 K8S_DIR       := k8s
 
 .PHONY: help build deploy-platform deploy-app verify status clean

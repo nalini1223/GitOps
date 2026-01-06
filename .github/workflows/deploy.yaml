@@ -56,21 +56,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # 1. Move to a temporary directory outside the current git worker
+          cd ..
+          
+          # 2. Clone a FRESH copy of the repo into a new folder
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git sync-repo
+          cd sync-repo
+          
+          # 3. Apply the image tag change to the NEW clone
+          sed -i "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" k8s/deployment.yaml
+          
+          # 4. Setup identity and push
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          
-          # 1. Update the remote URL with the token
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
-
-          # 2. Stage the change
           git add k8s/deployment.yaml
-          
-          # 3. Create the commit (or exit if nothing changed)
           git commit -m "gitops: deploy image ${IMAGE_TAG}" || exit 0
           
-          # 4. FORCE PUSH
-          # This tells GitHub: "I don't care if the remote is ahead, make it match my local state"
-          git push origin main --force
+          # 5. Push (since this is a fresh clone, it's highly likely to succeed)
+          git push origin main
 
     
 

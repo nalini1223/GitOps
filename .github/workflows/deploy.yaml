@@ -27,12 +27,11 @@ jobs:
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # FIXED: Remove deprecated 'install' parameter
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           driver: docker-container
-          use: true  # This makes it the default builder
+          use: true
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -46,7 +45,7 @@ jobs:
           context: hello-fastapi
           file: hello-fastapi/Dockerfile
           push: true
-          platforms: linux/amd64
+          platforms: linux/arm64  # ← Fixed for your Apple Silicon cluster
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest

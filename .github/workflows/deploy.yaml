@@ -56,24 +56,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 1. Move to a temporary directory outside the current git worker
-          cd ..
-          
-          # 2. Clone a FRESH copy of the repo into a new folder
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git sync-repo
-          cd sync-repo
-          
-          # 3. Apply the image tag change to the NEW clone
-          sed -i "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" k8s/deployment.yaml
-          
-          # 4. Setup identity and push
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          
+          # 1. Stage the specific file
           git add k8s/deployment.yaml
+          
+          # 2. Commit (only if there are changes)
           git commit -m "gitops: deploy image ${IMAGE_TAG}" || exit 0
           
-          # 5. Push (since this is a fresh clone, it's highly likely to succeed)
-          git push origin main
+          # 3. Use the token to fetch and rebase right before pushing
+          # This inserts your commit at the very end of the current remote timeline
+          git pull --rebase https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git main
+          
+          # 4. Push the result
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git HEAD:main
 
     
 

@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'k8s/**' # This stops the Action from triggering itself
 
 # 1. FIX: Added permissions to allow the bot to push changes back to the repo
 permissions:

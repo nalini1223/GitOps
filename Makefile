@@ -29,17 +29,17 @@ build:
 
 ## Deploy GitOps platform components (Argo CD via Terraform)
 deploy-platform:
-    cd $(TERRAFORM_DIR) && terraform init && terraform apply
+→cd $(TERRAFORM_DIR) && terraform init && terraform apply
 
 ## Deploy application (GitOps controller reconciles state)
 deploy-app:
-	kubectl apply -f $(K8S_DIR)
+→kubectl apply -f $(K8S_DIR)
 
 ## Verify application and platform health
 verify:
-	kubectl get pods -n $(K8S_NAMESPACE)
-	kubectl get svc -n $(K8S_NAMESPACE)
-	kubectl get ingress -n $(K8S_NAMESPACE)
+→kubectl get pods -n $(K8S_NAMESPACE)
+→kubectl get svc -n $(K8S_NAMESPACE)
+→kubectl get ingress -n $(K8S_NAMESPACE)
 
 ## View high-level status
 status:

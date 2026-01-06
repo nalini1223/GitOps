@@ -62,7 +62,7 @@ COPY --from=build /python /python
 
 # Copy only the application entrypoint.
 # Keeping the runtime filesystem minimal improves security and clarity.
-COPY main.py /app/main.py
+COPY app/main.py /app/main.py
 
 # Expose the application port.
 # This is documentation for humans and orchestration systems (Kubernetes).

@@ -46,7 +46,7 @@ RUN find /python -name "*.dist-info" -type d -exec rm -rf {} +
 #   - NO shell, NO package manager, NO build tools
 #
 # This dramatically reduces attack surface and CVE exposure.
-FROM gcr.io/distroless/python3-debian12
+FROM gcr.io/distroless/python3-debian12 AS runtime
 
 # Explicitly tell Python where to find third-party dependencies.
 # Distroless does not use system site-packages, so this is required.

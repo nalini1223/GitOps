@@ -29,7 +29,7 @@ build:
 
 ## Deploy GitOps platform components (Argo CD via Terraform)
 deploy-platform:
-	cd $(TERRAFORM_DIR) && terraform init && terraform apply
+		cd $(TERRAFORM_DIR) && terraform init && terraform apply
 
 ## Deploy application (GitOps controller reconciles state)
 deploy-app:

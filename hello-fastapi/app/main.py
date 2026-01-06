@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI # type: ignore
+from fastapi.responses import JSONResponse # type: ignore
 
 # Create an instance of FastAPI
 app = FastAPI(title="My API Example")

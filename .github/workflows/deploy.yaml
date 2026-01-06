@@ -55,7 +55,46 @@ jobs:
           cache-from: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-      # ... rest of your workflow
+      - name: Update Kubernetes manifest
+        run: |
+          sed -i \
+            "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
+            k8s/deployment.yaml
+
+      - name: Commit and Push GitOps update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          
+          git add k8s/deployment.yaml
+          
+          # Only commit if changes exist
+          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || exit 0
+          
+          # FIX 2: Set remote URL and use a loop to beat the "rejected" error
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
+
+          for i in {1..5}; do
+            echo "Attempt $i to sync and push..."
+            git pull --rebase origin main && \
+            git push origin main && break || \
+            (echo "Conflict detected, retrying in 5s..." && sleep 5)
+          done
+
+      # FIX 3: Cleanup old Docker Hub tags (Free tier alternative to Retention Policies)
+      - name: Delete old images
+        uses: snok/container-retention-policy@v2
+        with:
+          account: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image-names: ${{ env.IMAGE_NAME }}
+          cut-off: 7d         # Keep images from last 7 days
+          keep-at-least: 3    # Always keep the last 3 versions
+          filter-tags: "!latest" # Never delete 'latest'
+
+    
 
 
 

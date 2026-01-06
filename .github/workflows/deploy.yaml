@@ -57,17 +57,20 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           
-          git add k8s/deployment.yaml
-          git commit -m "gitops: deploy image ${IMAGE_TAG}" || echo "No changes to commit"
+          # 1. Update the remote URL with the token
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
 
-          # This loop tries to pull and push up to 5 times
-          # It fixes the "rejected" error by syncing right before the push
-          for i in {1..5}; do
-            echo "Attempt $i to push changes..."
-            git pull --rebase https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git main && \
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git HEAD:main && break || \
-            sleep 5
-          done
+          # 2. Stage the change
+          git add k8s/deployment.yaml
+          
+          # 3. Create the commit (or exit if nothing changed)
+          git commit -m "gitops: deploy image ${IMAGE_TAG}" || exit 0
+          
+          # 4. FORCE PUSH
+          # This tells GitHub: "I don't care if the remote is ahead, make it match my local state"
+          git push origin main --force
+
+    
 
 
 

@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'k8s/**' # Prevents infinite loops
+      - 'k8s/**' # Prevents the action from triggering itself
 
 permissions:
   contents: write
@@ -22,12 +22,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Required for git pull --rebase
+          fetch-depth: 0 # Essential for git pull --rebase
 
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # FIX: This sets up the driver needed for registry caching
+      # FIX 1: Set up the driver needed for registry caching (Fixes driver error)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -64,20 +64,29 @@ jobs:
           
           git add k8s/deployment.yaml
           
-          # Only commit if changes exist; if no changes, the job succeeds and exits
+          # Only commit if changes exist
           git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || exit 0
           
-          # Set remote URL to include token for seamless push/pull
+          # FIX 2: Set remote URL and use a loop to beat the "rejected" error
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
 
-          # RETRY LOOP: This beats the "rejected (fetch first)" error
           for i in {1..5}; do
             echo "Attempt $i to sync and push..."
             git pull --rebase origin main && \
             git push origin main && break || \
             (echo "Conflict detected, retrying in 5s..." && sleep 5)
           done
-    
+
+      # FIX 3: Cleanup old Docker Hub tags (Free tier alternative to Retention Policies)
+      - name: Delete old images
+        uses: snok/container-retention-policy@v2
+        with:
+          account: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image-names: ${{ env.IMAGE_NAME }}
+          cut-off: 7d         # Keep images from last 7 days
+          keep-at-least: 3    # Always keep the last 3 versions
+          filter-tags: "!latest" # Never delete 'latest'
 
 
 

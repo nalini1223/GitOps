@@ -57,13 +57,16 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Build & push image
-      - name: Build and Push Image
+      - name: Build and push image
         uses: docker/build-push-action@v5
         with:
           context: hello-fastapi
+          file: hello-fastapi/Dockerfile
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: |
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+             docker.io/naliniudayt/fastapi-distroless:${IMAGE_TAG}
+             docker.io/naliniudayt/fastapi-distroless:latest
 
       #  Update GitOps manifest
       - name: Update deployment image

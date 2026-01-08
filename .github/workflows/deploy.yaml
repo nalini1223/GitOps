@@ -1,73 +1,86 @@
-name: CI - Docker Build and GitOps Deploy
+name: Exam CI – GitOps with Terraform + Argo CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths-ignore:
-      - 'k8s/**'
+      - k8s/**
 
 permissions:
   contents: write
 
 env:
-  REGISTRY: docker.io
   IMAGE_NAME: fastapi-distroless
+  REGISTRY: docker.io
 
 jobs:
-  build:
+  gitops-exam:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 1️⃣ Checkout
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
+      # 2️⃣ Create local Kubernetes cluster
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: exam-cluster
+
+      # 3️⃣ Install Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # 4️⃣ Terraform init & apply (Argo CD bootstrap)
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply (Install Argo CD)
+        working-directory: terraform
+        run: terraform apply -auto-approve
+
+      # 5️⃣ Set image tag
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
+      # 6️⃣ Setup Docker Buildx
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          use: true
 
+      # 7️⃣ Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image
+      # 8️⃣ Build & push image
+      - name: Build and Push Image
         uses: docker/build-push-action@v5
         with:
           context: hello-fastapi
-          file: hello-fastapi/Dockerfile
           push: true
-          platforms: linux/arm64  # ← Fixed for your Apple Silicon cluster
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-          cache-from: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-      - name: Update Kubernetes manifest
+      # 9️⃣ Update GitOps manifest
+      - name: Update deployment image
         run: |
           sed -i \
             "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
             k8s/deployment.yaml
 
-      - name: Commit and Push GitOps update
+      # 🔟 Commit and push GitOps change
+      - name: Commit GitOps update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          
           git add k8s/deployment.yaml
-          
-          git commit -m "gitops: deploy image ${{ env.IMAGE_TAG }}" || exit 0
+          git commit -m "gitops: deploy ${IMAGE_TAG}" || exit 0
           
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
 

@@ -65,8 +65,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fastapi-distroless:${{ env.IMAGE_TAG }}
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fastapi-distroless:latest
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       #  Update GitOps manifest
       - name: Update deployment image

@@ -1,4 +1,4 @@
-name: Exam CI – GitOps with Terraform + Argo CD
+name: GitOps with Terraform + Argo CD
 
 on:
   push:

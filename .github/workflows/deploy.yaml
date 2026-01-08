@@ -81,9 +81,7 @@ jobs:
           git config user.email "github-actions@github.com"
           git add k8s/deployment.yaml
           git commit -m "gitops: deploy ${IMAGE_TAG}" || exit 0
-          
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/nalini1223/GitOps.git
-
           for i in {1..5}; do
             echo "Attempt $i to sync and push..."
             git pull --rebase origin main && \
@@ -91,8 +89,9 @@ jobs:
             (echo "Conflict detected, retrying in 5s..." && sleep 5)
           done
 
-          - name: Show deployed image and local pull command
-              run: |
+       # CI prints the exact image tag + pull command
+      - name: Show deployed image and local pull command
+        run: |
                 echo "Deployed image:"
                 kubectl get deployment hello-fastapi \
                   -n hello-fastapi \

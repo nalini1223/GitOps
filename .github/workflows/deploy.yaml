@@ -18,21 +18,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout
+      # Checkout
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Create local Kubernetes cluster
+      # Create local Kubernetes cluster
       - name: Create kind cluster
         uses: helm/kind-action@v1
         with:
           cluster_name: exam-cluster
 
-      # 3️⃣ Install Terraform
+      # Install Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 4️⃣ Terraform init & apply (Argo CD bootstrap)
+      # Terraform init & apply (Argo CD bootstrap)
       - name: Terraform Init
         working-directory: terraform
         run: terraform init
@@ -41,22 +41,22 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve
 
-      # 5️⃣ Set image tag
+      # Set image tag
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # 6️⃣ Setup Docker Buildx
+      # Setup Docker Buildx
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 7️⃣ Login to Docker Hub
+      # Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 8️⃣ Build & push image
+      # Build & push image
       - name: Build and Push Image
         uses: docker/build-push-action@v5
         with:
@@ -65,14 +65,14 @@ jobs:
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
-      # 9️⃣ Update GitOps manifest
+      #  Update GitOps manifest
       - name: Update deployment image
         run: |
           sed -i \
             "s|image:.*|image: ${REGISTRY}/${{ secrets.DOCKERHUB_USERNAME }}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
             k8s/deployment.yaml
 
-      # 🔟 Commit and push GitOps change
+      #  Commit and push GitOps change
       - name: Commit GitOps update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,6 +90,18 @@ jobs:
             git push origin main && break || \
             (echo "Conflict detected, retrying in 5s..." && sleep 5)
           done
+
+          - name: Show deployed image and local pull command
+              run: |
+                echo "Deployed image:"
+                kubectl get deployment hello-fastapi \
+                  -n hello-fastapi \
+                  -o jsonpath='{.spec.template.spec.containers[0].image}'
+                echo ""
+                echo ""
+                echo "To pull locally, run:"
+                echo "docker pull docker.io/naliniudayt/fastapi-distroless:${IMAGE_TAG}"
+
 
     
 

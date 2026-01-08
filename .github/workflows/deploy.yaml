@@ -90,16 +90,14 @@ jobs:
           done
 
        # CI prints the exact image tag + pull command
-      - name: Show deployed image and local pull command
+      - name: Show deployed image (from Git)
         run: |
-                echo "Deployed image:"
-                kubectl get deployment hello-fastapi \
-                  -n hello-fastapi \
-                  -o jsonpath='{.spec.template.spec.containers[0].image}'
-                echo ""
-                echo ""
-                echo "To pull locally, run:"
-                echo "docker pull docker.io/naliniudayt/fastapi-distroless:${IMAGE_TAG}"
+           echo "Deployed image (from GitOps manifest):"
+           grep "image:" k8s/deployment.yaml
+           echo ""
+           echo "To pull locally, run:"
+           echo "docker pull docker.io/<your-username>/fastapi-distroless:${IMAGE_TAG}"
+
 
 
     
